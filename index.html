@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جستجوی موجودی از JSON</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: #e8f4fc;
+            border-left: 5px solid #3498db;
+            display: none;
+        }
+        #result.show {
+            display: block;
+        }
+        .amount {
+            font-size: 24px;
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .error {
+            color: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>جستجوی موجودی از JSON</h1>
+        
+        <label for="keyInput">کلید (نام کاربر) را وارد کنید:</label>
+        <input type="text" id="keyInput" placeholder="مثال: علی یا ali">
+        
+        <button onclick="searchJSON()">جستجو</button>
+        
+        <div id="result">
+            <p>موجودی کاربر:</p>
+            <p class="amount" id="amount"></p>
+        </div>
+    </div>
+
+    <script>
+        // داده JSON از پیش تعریف‌شده (مثلاً اطلاعات کاربران)
+        const usersData = {
+            "علی": 5000,
+            "رضا": 7500,
+            "نازنین": 12000,
+            "ali": 3000,
+            "maryam": 9500
+        };
+
+        function searchJSON() {
+            const keyInput = document.getElementById("keyInput").value.trim();
+            const resultDiv = document.getElementById("result");
+            const amountDisplay = document.getElementById("amount");
+            
+            if (!keyInput) {
+                amountDisplay.textContent = "لطفاً یک کلید وارد کنید!";
+                amountDisplay.className = "error";
+                resultDiv.classList.add("show");
+                return;
+            }
+            
+            // جستجو در JSON
+            if (usersData.hasOwnProperty(keyInput)) {
+                amountDisplay.textContent = `${usersData[keyInput]} تومان`;
+                amountDisplay.className = "amount";
+                resultDiv.classList.add("show");
+            } else {
+                amountDisplay.textContent = "کاربر یافت نشد!";
+                amountDisplay.className = "error";
+                resultDiv.classList.add("show");
+            }
+        }
+    </script>
+</body>
+  </html>
