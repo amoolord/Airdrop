@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>جستجوی موجودی از JSON</title>
+    <title>سیستم بانکی پیشرفته</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -25,13 +25,36 @@
             text-align: center;
             margin-bottom: 20px;
         }
+        .tab-buttons {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            background: #ecf0f1;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+        .tab-btn.active {
+            background: #3498db;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
         label {
             display: block;
             margin-bottom: 8px;
             font-weight: bold;
             color: #2c3e50;
         }
-        input {
+        input, select {
             width: 100%;
             padding: 10px;
             margin-bottom: 15px;
@@ -59,10 +82,6 @@
             border-radius: 5px;
             background-color: #e8f4fc;
             border-left: 5px solid #3498db;
-            display: none;
-        }
-        #result.show {
-            display: block;
         }
         .amount {
             font-size: 24px;
@@ -72,56 +91,177 @@
         .error {
             color: #e74c3c;
         }
+        .success {
+            color: #27ae60;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>جستجوی موجودی از JSON</h1>
+        <h1>سیستم بانکی پیشرفته</h1>
         
-        <label for="keyInput">کلید (نام کاربر) را وارد کنید:</label>
-        <input type="text" id="keyInput" placeholder="مثال: علی یا ali">
+        <div class="tab-buttons">
+            <button class="tab-btn active" onclick="openTab('transfer')">انتقال وجه</button>
+            <button class="tab-btn" onclick="openTab('create')">ایجاد حساب جدید</button>
+            <button class="tab-btn" onclick="openTab('check')">بررسی موجودی</button>
+        </div>
         
-        <button onclick="searchJSON()">جستجو</button>
+        <!-- تب انتقال وجه -->
+        <div id="transfer" class="tab-content active">
+            <label for="sender">نام فرستنده:</label>
+            <input type="text" id="sender" placeholder="مثال: علی">
+            
+            <label for="receiver">نام گیرنده:</label>
+            <input type="text" id="receiver" placeholder="مثال: رضا">
+            
+            <label for="amount">مبلغ (تومان):</label>
+            <input type="number" id="amount" placeholder="مثال: 10000">
+            
+            <label for="password">رمز عبور فرستنده:</label>
+            <input type="password" id="password" placeholder="رمز 15 رقمی">
+            
+            <button onclick="transferMoney()">انتقال وجه</button>
+            
+            <div id="transfer-result"></div>
+        </div>
         
-        <div id="result">
-            <p>موجودی کاربر:</p>
-            <p class="amount" id="amount"></p>
+        <!-- تب ایجاد حساب جدید -->
+        <div id="create" class="tab-content">
+            <label for="new-user">نام کاربری جدید:</label>
+            <input type="text" id="new-user" placeholder="مثال: محمد">
+            
+            <button onclick="createAccount()">ایجاد حساب</button>
+            
+            <div id="create-result">
+                <p id="new-password"></p>
+                <p id="initial-balance"></p>
+            </div>
+        </div>
+        
+        <!-- تب بررسی موجودی -->
+        <div id="check" class="tab-content">
+            <label for="check-user">نام کاربری:</label>
+            <input type="text" id="check-user" placeholder="مثال: نازنین">
+            
+            <button onclick="checkBalance()">بررسی موجودی</button>
+            
+            <div id="check-result"></div>
         </div>
     </div>
 
     <script>
-        // داده JSON از پیش تعریف‌شده (مثلاً اطلاعات کاربران)
-        const usersData = {
-            "علی": 5000,
-            "رضا": 7500,
-            "نازنین": 12000,
-            "ali": 3000,
-            "maryam": 9500
+        // پایگاه داده کاربران
+        let users = {
+            "علی": { balance: 5000, password: "123456789012345" },
+            "رضا": { balance: 7500, password: "234567890123456" },
+            "نازنین": { balance: 12000, password: "345678901234567" }
         };
 
-        function searchJSON() {
-            const keyInput = document.getElementById("keyInput").value.trim();
-            const resultDiv = document.getElementById("result");
-            const amountDisplay = document.getElementById("amount");
+        // فعال‌سازی تب‌ها
+        function openTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(tabName).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        // تابع انتقال وجه
+        function transferMoney() {
+            const sender = document.getElementById("sender").value.trim();
+            const receiver = document.getElementById("receiver").value.trim();
+            const amount = parseInt(document.getElementById("amount").value);
+            const password = document.getElementById("password").value.trim();
+            const resultDiv = document.getElementById("transfer-result");
             
-            if (!keyInput) {
-                amountDisplay.textContent = "لطفاً یک کلید وارد کنید!";
-                amountDisplay.className = "error";
-                resultDiv.classList.add("show");
+            // اعتبارسنجی
+            if (!sender || !receiver || !amount || !password) {
+                resultDiv.innerHTML = '<p class="error">لطفاً همه فیلدها را پر کنید!</p>';
                 return;
             }
             
-            // جستجو در JSON
-            if (usersData.hasOwnProperty(keyInput)) {
-                amountDisplay.textContent = `${usersData[keyInput]} تومان`;
-                amountDisplay.className = "amount";
-                resultDiv.classList.add("show");
-            } else {
-                amountDisplay.textContent = "کاربر یافت نشد!";
-                amountDisplay.className = "error";
-                resultDiv.classList.add("show");
+            if (!users[sender] || !users[receiver]) {
+                resultDiv.innerHTML = '<p class="error">فرستنده یا گیرنده نامعتبر است!</p>';
+                return;
             }
+            
+            if (users[sender].password !== password) {
+                resultDiv.innerHTML = '<p class="error">رمز عبور نادرست است!</p>';
+                return;
+            }
+            
+            if (users[sender].balance < amount) {
+                resultDiv.innerHTML = '<p class="error">موجودی کافی نیست!</p>';
+                return;
+            }
+            
+            // انجام انتقال
+            users[sender].balance -= amount;
+            users[receiver].balance += amount;
+            
+            resultDiv.innerHTML = `
+                <p class="success">انتقال با موفقیت انجام شد!</p>
+                <p>موجودی جدید ${sender}: ${users[sender].balance} تومان</p>
+                <p>موجودی جدید ${receiver}: ${users[receiver].balance} تومان</p>
+            `;
+        }
+
+        // تابع ایجاد حساب جدید
+        function createAccount() {
+            const username = document.getElementById("new-user").value.trim();
+            const resultDiv = document.getElementById("create-result");
+            
+            if (!username) {
+                resultDiv.innerHTML = '<p class="error">لطفاً نام کاربری را وارد کنید!</p>';
+                return;
+            }
+            
+            if (users[username]) {
+                resultDiv.innerHTML = '<p class="error">این کاربر قبلاً ثبت شده است!</p>';
+                return;
+            }
+            
+            // تولید رمز 15 رقمی تصادفی
+            const newPassword = Math.random().toString(36).substring(2, 17).padEnd(15, '0').substring(0, 15);
+            
+            // ایجاد کاربر جدید
+            users[username] = {
+                balance: 0,
+                password: newPassword
+            };
+            
+            document.getElementById("new-password").innerHTML = `
+                <p class="success">حساب با موفقیت ایجاد شد!</p>
+                <p><strong>رمز عبور شما:</strong> ${newPassword}</p>
+            `;
+            document.getElementById("initial-balance").innerHTML = `
+                <p><strong>موجودی اولیه:</strong> 0 تومان</p>
+            `;
+        }
+
+        // تابع بررسی موجودی
+        function checkBalance() {
+            const username = document.getElementById("check-user").value.trim();
+            const resultDiv = document.getElementById("check-result");
+            
+            if (!username) {
+                resultDiv.innerHTML = '<p class="error">لطفاً نام کاربری را وارد کنید!</p>';
+                return;
+            }
+            
+            if (!users[username]) {
+                resultDiv.innerHTML = '<p class="error">کاربر یافت نشد!</p>';
+                return;
+            }
+            
+            resultDiv.innerHTML = `
+                <p><strong>موجودی ${username}:</strong></p>
+                <p class="amount">${users[username].balance} تومان</p>
+            `;
         }
     </script>
 </body>
-  </html>
+                </html>
