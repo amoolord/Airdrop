@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>جنگ جهانی: نبرد نهایی</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+      touch-action: manipulation;
+      font-family: 'Noto Naskh Arabic', 'Segoe UI', sans-serif;
+    }
+    
+    body {
+      background: #0a0a1a;
+      color: white;
+      overflow: hidden;
+      touch-action: none;
+    }
+    
+    /* استایل منو اصلی */
+    #mainMenu {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at center, #0f2027 0%, #203a43 50%, #2c5364 100%);
+      z-index: 100;
+      padding: 20px;
+      text-align: center;
+      transition: all 0.5s ease;
+    }
+    
+    .logo {
+      font-size: 2.8rem;
+      margin-bottom: 20px;
+      color: #00e5ff;
+      text-shadow: 0 0 15px rgba(0, 229, 255, 0.7);
+      animation: glow 2s infinite alternate;
+    }
+    
+    @keyframes glow {
+      from { text-shadow: 0 0 10px rgba(0, 229, 255, 0.7); }
+      to { text-shadow: 0 0 20px rgba(0, 229, 255, 1), 0 0 30px rgba(0, 150, 255, 0.7); }
+    }
+    
+    .menu-subtitle {
+      font-size: 1.2rem;
+      margin-bottom: 30px;
+      opacity: 0.8;
+    }
+    
+    .menu-btn {
+      background: linear-gradient(135deg, #00c6ff, #0072ff);
+      color: white;
+      border: none;
+      border-radius: 25px;
+      padding: 15px 30px;
+      margin: 10px 0;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      width: 80%;
+      max-width: 300px;
+      box-shadow: 0 5px 15px rgba(0, 114, 255, 0.3);
+      transition: all 0.3s;
+    }
+    
+    .menu-btn:hover, .menu-btn:active {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 114, 255, 0.4);
+    }
+    
+    .menu-btn.secondary {
+      background: linear-gradient(135deg, #6a11cb, #2575fc);
+    }
+    
+    /* استایل منو تنظیمات */
+    .settings-panel {
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 20px;
+      width: 90%;
+      max-width: 500px;
+      margin-top: 20px;
+      display: none;
+    }
+    
+    .settings-panel h3 {
+      margin-bottom: 15px;
+      color: #00e5ff;
+    }
+    
+    .input-group {
+      margin-bottom: 15px;
+      text-align: right;
+    }
+    
+    .input-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 0.9rem;
+    }
+    
+    .input-group input, .input-group select {
+      width: 100%;
+      padding: 12px 15px;
+      border-radius: 12px;
+      border: 1px solid #444;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      font-size: 1rem;
+    }
+    
+    /* استایل بازی */
+    #gameContainer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      display: none;
+    }
+    
+    #worldMap {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 2000px;
+      height: 1000px;
+      background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/World_map_-_low_resolution.svg/1200px-World_map_-_low_resolution.svg.png');
+      background-size: cover;
+      background-position: center;
+      opacity: 0.7;
+    }
+    
+    #gameCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 2;
+    }
+    
+    .country {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  z-index: 3;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  transform: translate(-50%, -50%); /* این خط را اضافه کنید */
+}
+    
+    .country:hover {
+      transform: scale(1.1);
+    }
+    
+    .country-name {
+      position: absolute;
+      bottom: -25px;
+      font-size: 0.9rem;
+      font-weight: bold;
+      text-shadow: 1px 1px 3px black;
+      white-space: nowrap;
+    }
+    
+    .hp-bar {
+      position: absolute;
+      width: 60px;
+      height: 8px;
+      background: rgba(255, 0, 0, 0.5);
+      border-radius: 4px;
+      bottom: -40px;
+      overflow: hidden;
+    }
+    
+    .hp-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #00c853, #5efc82);
+      width: 100%;
+      transition: width 0.3s;
+    }
+    
+    /* رابط کاربری بازی */
+    #gameUI {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(10px);
+      padding: 15px;
+      z-index: 10;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      display: none;
+    }
+    
+    .player-info {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
+    }
+    
+    .player-stats {
+      display: flex;
+      gap: 15px;
+    }
+    
+    .stat {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 8px 12px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .stat.money {
+      color: gold;
+    }
+    
+    .stat.health {
+      color: #ff5252;
+    }
+    
+    .stat.defense {
+      color: #40c4ff;
+    }
+    
+    #actionPanel {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    
+    .action-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      border-radius: 12px;
+      padding: 12px 5px;
+      color: white;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .action-btn:hover, .action-btn.active {
+      background: rgba(0, 150, 255, 0.3);
+      transform: scale(1.05);
+    }
+    
+    .action-btn .icon {
+      font-size: 1.4rem;
+    }
+    
+    .action-btn .cost {
+      color: gold;
+      font-size: 0.8rem;
+    }
+    
+    #chatBox {
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 12px;
+      padding: 10px;
+      max-height: 120px;
+      overflow-y: auto;
+    }
+    
+    #messages {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      font-size: 0.9rem;
+    }
+    
+    .message {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 8px 12px;
+      border-radius: 8px;
+      animation: fadeIn 0.3s;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    #chatInput {
+      width: 100%;
+      padding: 10px 15px;
+      margin-top: 10px;
+      border-radius: 12px;
+      border: none;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      font-size: 0.9rem;
+    }
+    
+    /* انیمیشن‌ها و افکت‌ها */
+    .explosion {
+      position: absolute;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,200,0,0.8) 0%, rgba(255,100,0,0.6) 50%, rgba(255,0,0,0) 100%);
+      transform: translate(-50%, -50%);
+      z-index: 4;
+      animation: explode 0.8s forwards;
+    }
+    
+    @keyframes explode {
+      0% { width: 0; height: 0; opacity: 1; }
+      100% { width: 200px; height: 200px; opacity: 0; }
+    }
+    
+    .alliance-glow {
+      animation: allianceGlow 2s infinite alternate;
+    }
+    
+    @keyframes allianceGlow {
+      from { box-shadow: 0 0 10px rgba(0, 255, 255, 0.5); }
+      to { box-shadow: 0 0 20px rgba(0, 255, 255, 0.8), 0 0 30px rgba(0, 150, 255, 0.5); }
+    }
+    
+    /* صفحه پایان بازی */
+    #gameOver {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+      display: none;
+    }
+    
+    #gameOver h2 {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+      color: #ff5252;
+    }
+    
+    #gameOver p {
+      font-size: 1.2rem;
+      margin-bottom: 30px;
+      text-align: center;
+      max-width: 80%;
+    }
+    
+    /* اسکرول بار سفارشی */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 3px;
+    }
+    
+    /* رسپانسیو برای موبایل */
+    @media (max-width: 768px) {
+      .logo {
+        font-size: 2rem;
+      }
+      
+      .menu-subtitle {
+        font-size: 1rem;
+      }
+      
+      .menu-btn {
+        padding: 12px 20px;
+        font-size: 1rem;
+      }
+      
+      #actionPanel {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .country {
+        width: 50px;
+        height: 50px;
+        font-size: 1.8rem;
+      }
+      
+      .country-name {
+        font-size: 0.7rem;
+        bottom: -20px;
+      }
+      
+      .hp-bar {
+        width: 40px;
+        height: 6px;
+        bottom: -30px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- منوی اصلی -->
+  <div id="mainMenu">
+    <div class="logo">🌍 جنگ جهانی: نبرد نهایی</div>
+    <p class="menu-subtitle">استراتژی، اتحاد، پیروزی - جهان در دستان شماست</p>
+    
+    <button class="menu-btn" onclick="showSettings('single')">بازی تک نفره</button>
+    <button class="menu-btn secondary" onclick="showSettings('multi')">بازی چندنفره</button>
+    <button class="menu-btn" onclick="showTutorial()">آموزش بازی</button>
+    
+    <div id="singlePlayerSettings" class="settings-panel">
+      <h3>تنظیمات بازی تک نفره</h3>
+      <div class="input-group">
+        <label for="spPlayerName">نام شما</label>
+        <input type="text" id="spPlayerName" placeholder="نام بازیکن" value="ایران">
+      </div>
+      <div class="input-group">
+        <label for="spDifficulty">سطح دشواری</label>
+        <select id="spDifficulty">
+          <option value="easy">آسان</option>
+          <option value="medium" selected>متوسط</option>
+          <option value="hard">سخت</option>
+        </select>
+      </div>
+      <button class="menu-btn" onclick="startGame('single')">شروع بازی</button>
+    </div>
+    
+    <div id="multiPlayerSettings" class="settings-panel">
+      <h3>تنظیمات بازی چندنفره</h3>
+      <div class="input-group">
+        <label for="mpPlayerName">نام شما</label>
+        <input type="text" id="mpPlayerName" placeholder="نام بازیکن" value="ایران">
+      </div>
+      <div class="input-group">
+        <label for="mpRoomCode">کد اتاق (برای پیوستن)</label>
+        <input type="text" id="mpRoomCode" placeholder="اختیاری">
+      </div>
+      <button class="menu-btn" onclick="startGame('multi')">ایجاد اتاق</button>
+      <button class="menu-btn secondary" onclick="joinRoom()">پیوستن به اتاق</button>
+    </div>
+  </div>
+
+  <!-- صفحه بازی -->
+  <div id="gameContainer">
+    <div id="worldMap"></div>
+    <canvas id="gameCanvas"></canvas>
+    
+    <!-- رابط کاربری بازی -->
+    <div id="gameUI">
+      <div class="player-info">
+        <div class="player-stats">
+          <div class="stat money">💰 <span id="moneyValue">150</span></div>
+          <div class="stat health">❤️ <span id="healthValue">100</span></div>
+          <div class="stat defense">🛡️ <span id="defenseValue">0</span></div>
+        </div>
+        <button id="endTurnBtn" style="display:none;">اتمام نوبت</button>
+      </div>
+      
+      <div id="actionPanel"></div>
+      
+      <div id="chatBox">
+        <div id="messages"></div>
+        <input type="text" id="chatInput" placeholder="پیام خود را بنویسید..." />
+      </div>
+    </div>
+  </div>
+  
+  <!-- صفحه پایان بازی -->
+  <div id="gameOver">
+    <h2 id="gameResult">پایان بازی!</h2>
+    <p id="gameSummary">شما جهان را فتح کردید!</p>
+    <button class="menu-btn" onclick="returnToMenu()">بازگشت به منو</button>
+  </div>
+
+  <script>
+    // --- تنظیمات بازی ---
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const worldMap = document.getElementById('worldMap');
+    const gameContainer = document.getElementById('gameContainer');
+    
+    // تنظیم اندازه کانواس
+    function resizeCanvas() {
+      canvas.width = gameContainer.clientWidth;
+      canvas.height = gameContainer.clientHeight;
+      worldMap.style.width = canvas.width * 2 + 'px';
+      worldMap.style.height = canvas.height * 2 + 'px';
+    }
+    
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    
+    // --- کشورهای بازی ---
+    const COUNTRIES = [
+  { name: "ایران", flag: "🇮🇷", color: "#27ae60", x: 65, y: 45, capital: "تهران" },
+  { name: "آمریکا", flag: "🇺🇸", color: "#3498db", x: 20, y: 40, capital: "واشنگتن" },
+  { name: "روسیه", flag: "🇷🇺", color: "#c0392b", x: 70, y: 25, capital: "مسکو" },
+  { name: "چین", flag: "🇨🇳", color: "#f39c12", x: 80, y: 45, capital: "پکن" },
+  { name: "فرانسه", flag: "🇫🇷", color: "#8e44ad", x: 48, y: 38, capital: "پاریس" },
+  { name: "آلمان", flag: "🇩🇪", color: "#e67e22", x: 50, y: 35, capital: "برلین" },
+  { name: "انگلیس", flag: "🇬🇧", color: "#1abc9c", x: 45, y: 30, capital: "لندن" },
+  { name: "ترکیه", flag: "🇹🇷", color: "#9b59b6", x: 55, y: 40, capital: "آنکارا" },
+  { name: "هند", flag: "🇮🇳", color: "#2ecc71", x: 75, y: 55, capital: "دهلی" },
+  { name: "ژاپن", flag: "🇯🇵", color: "#e74c3c", x: 90, y: 40, capital: "توکیو" },
+  { name: "برزیل", flag: "🇧🇷", color: "#2ecc71", x: 35, y: 70, capital: "برازیلیا" },
+  { name: "استرالیا", flag: "🇦🇺", color: "#1abc9c", x: 85, y: 75, capital: "کانبرا" },
+  { name: "کانادا", flag: "🇨🇦", color: "#e74c3c", x: 25, y: 30, capital: "اتاوا" },
+  { name: "مکزیک", flag: "🇲🇽", color: "#f39c12", x: 15, y: 50, capital: "مکزیکو سیتی" },
+  { name: "آفریقای جنوبی", flag: "🇿🇦", color: "#3498db", x: 55, y: 80, capital: "پرتوریا" }
+];
+    
+    // --- انواع واحدهای نظامی ---
+    const UNITS = {
+      missile: { cost: 20, damage: [15, 30], icon: "🚀", name: "موشک", cooldown: 2 },
+      tank: { cost: 40, damage: [25, 40], icon: "🛡️", name: "تانک", cooldown: 3 },
+      nuke: { cost: 150, damage: [80, 120], icon: "☢️", name: "هسته‌ای", cooldown: 10 },
+      drone: { cost: 60, damage: [20, 30], icon: "🛸", name: "پهپاد", cooldown: 3 },
+      bomber: { cost: 100, damage: [50, 80], icon: "✈️", name: "بمب‌افکن", cooldown: 5 },
+      laser: { cost: 200, damage: [100, 150], icon: "⚡", name: "لیزر", cooldown: 8 }
+    };
+    
+    // --- متغیرهای بازی ---
+    let players = {};
+    let localPlayer = null;
+    let gameMode = null;
+    let missiles = [];
+    let explosions = [];
+    let particles = [];
+    let selectedUnit = 'missile';
+    let alliances = [];
+    let gameTurn = 0;
+    let isPlayerTurn = true;
+    let mapOffsetX = 0;
+    let mapOffsetY = 0;
+    let isDragging = false;
+    let lastX, lastY;
+    
+    // --- توابع منو ---
+    function showSettings(mode) {
+      document.getElementById('singlePlayerSettings').style.display = 'none';
+      document.getElementById('multiPlayerSettings').style.display = 'none';
+      
+      if (mode === 'single') {
+        document.getElementById('singlePlayerSettings').style.display = 'block';
+      } else {
+        document.getElementById('multiPlayerSettings').style.display = 'block';
+      }
+    }
+    
+    function showTutorial() {
+      alert("آموزش بازی:\n\n1. با کلیک روی کشورها به آنها حمله کنید\n2. از دکمه‌های پایین برای انتخاب نوع حمله استفاده کنید\n3. با دیگران اتحاد تشکیل دهید\n4. سرمایه خود را با دقت خرج کنید\n5. آخرین بازمانده برنده است!");
+    }
+    
+    function startGame(mode) {
+      gameMode = mode;
+      document.getElementById('mainMenu').style.display = 'none';
+      document.getElementById('gameContainer').style.display = 'block';
+      document.getElementById('gameUI').style.display = 'flex';
+      
+      const playerName = mode === 'single' ? 
+        document.getElementById('spPlayerName').value || 'ایران' : 
+        document.getElementById('mpPlayerName').value || 'ایران';
+      
+      // ایجاد بازیکن محلی
+      localPlayer = {
+        id: 'player1',
+        name: playerName,
+        country: COUNTRIES[0],
+        hp: 100,
+        money: 150,
+        defense: 0,
+        isAI: false,
+        units: {...UNITS}
+      };
+      players[localPlayer.id] = localPlayer;
+      
+      // حالت تک نفره: ایجاد ربات‌ها
+      if (mode === 'single') {
+        const difficulty = document.getElementById('spDifficulty').value;
+        const aiCount = 5; // تعداد ربات‌ها
+        
+        for (let i = 1; i <= aiCount; i++) {
+          const country = COUNTRIES[i % COUNTRIES.length];
+          players[`ai_${i}`] = {
+            id: `ai_${i}`,
+            name: `${country.name} (ربات)`,
+            country: country,
+            hp: 100,
+            money: difficulty === 'easy' ? 100 : (difficulty === 'hard' ? 200 : 150),
+            defense: 0,
+            isAI: true,
+            difficulty: difficulty,
+            lastAction: 0
+          };
+        }
+        
+        addMessage("🤖 ربات‌ها آماده جنگ هستند!");
+      } 
+      // حالت چندنفره: ایجاد بازیکنان خالی (در عمل از سرور پر می‌شوند)
+      else {
+        addMessage("👋 به بازی چندنفره خوش آمدید!");
+        addMessage("در حال انتظار برای بازیکنان دیگر...");
+        document.getElementById('endTurnBtn').style.display = 'block';
+      }
+      
+      // ایجاد رابط واحدها
+      setupActionPanel();
+      
+      // ایجاد کشورها در نقشه
+      renderCountries();
+      
+      // شروع بازی
+      gameLoop();
+    }
+    
+    function joinRoom() {
+      const roomCode = document.getElementById('mpRoomCode').value;
+      if (!roomCode) {
+        alert("لطفا کد اتاق را وارد کنید");
+        return;
+      }
+      alert(`در حال پیوستن به اتاق ${roomCode}... (این یک دمو است)`);
+      startGame('multi');
+    }
+    
+    function returnToMenu() {
+      document.getElementById('gameOver').style.display = 'none';
+      document.getElementById('mainMenu').style.display = 'flex';
+      document.getElementById('gameContainer').style.display = 'none';
+      resetGame();
+    }
+    
+    function resetGame() {
+      players = {};
+      missiles = [];
+      explosions = [];
+      particles = [];
+      alliances = [];
+      gameTurn = 0;
+      document.getElementById('messages').innerHTML = '';
+    }
+    
+    // --- رابط کاربری بازی ---
+    function setupActionPanel() {
+      const panel = document.getElementById('actionPanel');
+      panel.innerHTML = '';
+      
+      // دکمه‌های واحدها
+      Object.entries(UNITS).forEach(([key, unit]) => {
+        const btn = document.createElement('button');
+        btn.className = 'action-btn';
+        btn.innerHTML = `
+          <span class="icon">${unit.icon}</span>
+          <span>${unit.name}</span>
+          <span class="cost">$${unit.cost}</span>
+        `;
+        btn.onclick = () => selectUnit(key);
+        panel.appendChild(btn);
+      });
+      
+      // دکمه اتحاد
+      const allianceBtn = document.createElement('button');
+      allianceBtn.className = 'action-btn';
+      allianceBtn.innerHTML = `
+        <span class="icon">🤝</span>
+        <span>اتحاد</span>
+      `;
+      allianceBtn.onclick = proposeAlliance;
+      panel.appendChild(allianceBtn);
+      
+      // دکمه دفاع
+      const defenseBtn = document.createElement('button');
+      defenseBtn.className = 'action-btn';
+      defenseBtn.innerHTML = `
+        <span class="icon">🏰</span>
+        <span>دفاع</span>
+      `;
+      defenseBtn.onclick = increaseDefense;
+      panel.appendChild(defenseBtn);
+    }
+    
+    function selectUnit(unitType) {
+      selectedUnit = unitType;
+      // برجسته کردن دکمه انتخاب شده
+      document.querySelectorAll('#actionPanel .action-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+      addMessage(`✅ ${UNITS[unitType].name} انتخاب شد`);
+    }
+    
+    function proposeAlliance() {
+      const possibleAllies = Object.values(players).filter(p => 
+        p.id !== localPlayer.id && 
+        !alliances.some(a => a.includes(p.id) && a.includes(localPlayer.id))
+      );
+      
+      if (possibleAllies.length === 0) {
+        addMessage("❌ هیچ متحد بالقوه‌ای وجود ندارد");
+        return;
+      }
+      
+      const ally = possibleAllies[Math.floor(Math.random() * possibleAllies.length)];
+      alliances.push([localPlayer.id, ally.id]);
+      addMessage(`🤝 شما با ${ally.name} پیمان اتحاد بستید!`);
+      
+      // جلوه بصری اتحاد
+      document.querySelectorAll('.country').forEach(el => {
+        if (el.dataset.playerId === ally.id) {
+          el.classList.add('alliance-glow');
+        }
+      });
+    }
+    
+    function increaseDefense() {
+      if (localPlayer.money < 30) {
+        addMessage("❌ سرمایه کافی نیست!");
+        return;
+      }
+      
+      localPlayer.money -= 30;
+      localPlayer.defense += 1;
+      updatePlayerUI();
+      addMessage(`🛡️ سطح دفاع شما افزایش یافت: ${localPlayer.defense}`);
+    }
+    
+    function endTurn() {
+      isPlayerTurn = false;
+      document.getElementById('endTurnBtn').disabled = true;
+      addMessage("⏳ منتظر نوبت دیگر بازیکنان...");
+      
+      // در حالت چندنفره اینجا درخواست به سرور ارسال می‌شود
+      // در دمو، بعد از 2 ثانیه نوبت باز می‌گردد
+      setTimeout(() => {
+        isPlayerTurn = true;
+        document.getElementById('endTurnBtn').disabled = false;
+        gameTurn++;
+        localPlayer.money += 20 + Math.floor(Math.random() * 21);
+        updatePlayerUI();
+        addMessage(`♟️ نوبت ${gameTurn + 1} شروع شد! +$${20 + Math.floor(Math.random() * 21)}`);
+      }, 2000);
+    }
+    
+    function updatePlayerUI() {
+      document.getElementById('moneyValue').textContent = localPlayer.money;
+      document.getElementById('healthValue').textContent = localPlayer.hp;
+      document.getElementById('defenseValue').textContent = localPlayer.defense;
+    }
+    
+    // --- توابع بازی ---
+    function renderCountries() {
+      // پاک کردن کشورهای قبلی
+      document.querySelectorAll('.country').forEach(el => el.remove());
+      
+      // ایجاد کشورها
+      Object.values(players).forEach(player => {
+        const countryEl = document.createElement('div');
+        countryEl.className = 'country';
+        countryEl.style.left = `${player.country.x}%`;
+        countryEl.style.top = `${player.country.y}%`;
+        countryEl.style.backgroundColor = player.country.color;
+        countryEl.dataset.playerId = player.id;
+        
+        // پرچم
+        countryEl.innerHTML = `
+          ${player.country.flag}
+          <div class="country-name">${player.name}</div>
+          <div class="hp-bar"><div class="hp-fill" style="width: ${player.hp}%"></div></div>
+        `;
+        
+        // کلیک روی کشور (حمله)
+        countryEl.addEventListener('click', (e) => {
+          if (!isPlayerTurn || player.id === localPlayer.id) return;
+          
+          const unit = UNITS[selectedUnit];
+          if (localPlayer.money < unit.cost) {
+            addMessage(`❌ سرمایه کافی برای ${unit.name} ندارید!`);
+            return;
+          }
+          
+          localPlayer.money -= unit.cost;
+          updatePlayerUI();
+          
+          // ایجاد موشک
+          const fromX = parseInt(document.querySelector(`.country[data-player-id="${localPlayer.id}"]`).style.left);
+          const fromY = parseInt(document.querySelector(`.country[data-player-id="${localPlayer.id}"]`).style.top);
+          const toX = parseInt(e.currentTarget.style.left);
+          const toY = parseInt(e.currentTarget.style.top);
+          
+          launchMissile(fromX, fromY, toX, toY, player.country.color, selectedUnit, player.id);
+          
+          addMessage(`🔥 شما به ${player.name} حمله کردید! (${unit.name})`);
+        });
+        
+        worldMap.appendChild(countryEl);
+      });
+    }
+    
+    function launchMissile(fromX, fromY, toX, toY, color, type, targetId) {
+      const missile = {
+        x: fromX,
+        y: fromY,
+        toX: toX,
+        toY: toY,
+        color: color,
+        type: type,
+        targetId: targetId,
+        progress: 0,
+        speed: 0.005,
+        exploded: false
+      };
+      
+      missiles.push(missile);
+    }
+    
+    function createExplosion(x, y, type) {
+      const explosion = document.createElement('div');
+      explosion.className = 'explosion';
+      explosion.style.left = `${x}%`;
+      explosion.style.top = `${y}%`;
+      
+      if (type === 'nuke') {
+        explosion.style.background = 'radial-gradient(circle, rgba(255,255,0,0.8) 0%, rgba(255,0,0,0.6) 50%, rgba(0,0,0,0) 100%)';
+      }
+      
+      worldMap.appendChild(explosion);
+      explosions.push(explosion);
+      
+      // حذف انفجار بعد از پایان انیمیشن
+      setTimeout(() => {
+        explosion.remove();
+        explosions = explosions.filter(e => e !== explosion);
+      }, 800);
+    }
+    
+    function addMessage(text) {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'message';
+      msgDiv.textContent = text;
+      document.getElementById('messages').appendChild(msgDiv);
+      document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+    }
+    
+    // --- هوش مصنوعی ---
+    function aiTurn() {
+      if (gameMode !== 'single') return;
+      
+      Object.values(players).forEach(player => {
+        if (!player.isAI || player.hp <= 0) return;
+        
+        // تصمیم‌گیری بر اساس سطح دشواری
+        const decision = Math.random();
+        const enemies = Object.values(players).filter(p => !p.isAI && p.hp > 0);
+        
+        if (enemies.length === 0) return;
+        const target = enemies[0];
+        
+        // احتمال حمله
+        if (decision < 0.6) {
+          let unitType;
+          const rand = Math.random();
+          
+          if (rand < 0.4 && player.money >= UNITS.missile.cost) {
+            unitType = 'missile';
+          } else if (rand < 0.7 && player.money >= UNITS.tank.cost) {
+            unitType = 'tank';
+          } else if (rand < 0.85 && player.money >= UNITS.drone.cost) {
+            unitType = 'drone';
+          } else if (player.money >= UNITS.nuke.cost && Math.random() < (player.difficulty === 'hard' ? 0.3 : 0.1)) {
+            unitType = 'nuke';
+          } else {
+            // درآمدزایی
+            player.money += 20 + Math.floor(Math.random() * 30);
+            addMessage(`💰 ${player.name} درآمد کسب کرد!`);
+            return;
+          }
+          
+          player.money -= UNITS[unitType].cost;
+          launchMissile(
+            player.country.x, player.country.y,
+            target.country.x, target.country.y,
+            player.country.color, unitType, target.id
+          );
+          
+          addMessage(`🤖 ${player.name} به ${target.name} حمله کرد! (${UNITS[unitType].name})`);
+        } 
+        // احتمال اتحاد
+        else if (decision < 0.8 && Math.random() < 0.3) {
+          const possibleAllies = Object.values(players).filter(p => 
+            p.id !== player.id && 
+            !p.isAI && 
+            !alliances.some(a => a.includes(p.id) && a.includes(player.id))
+          );
+          
+          if (possibleAllies.length > 0) {
+            const ally = possibleAllies[0];
+            alliances.push([player.id, ally.id]);
+            addMessage(`🤝 ${player.name} و ${ally.name} متحد شدند!`);
+          }
+        }
+        // احتمال افزایش دفاع
+        else if (player.money >= 30 && Math.random() < 0.4) {
+          player.money -= 30;
+          player.defense += 1;
+          addMessage(`🛡️ ${player.name} دفاع خود را تقویت کرد!`);
+        }
+      });
+    }
+    
+    // --- حلقه اصلی بازی ---
+    function gameLoop() {
+      // به‌روزرسانی موشک‌ها
+      missiles.forEach(missile => {
+        if (missile.exploded) return;
+        
+        missile.progress += missile.speed;
+        if (missile.progress >= 1) {
+          missile.exploded = true;
+          missile.progress = 1;
+          
+          // اعمال آسیب به هدف
+          const target = players[missile.targetId];
+          if (target) {
+            const unit = UNITS[missile.type];
+            const damage = Math.floor(unit.damage[0] + Math.random() * (unit.damage[1] - unit.damage[0]));
+            const reducedDamage = Math.floor(damage * Math.pow(0.7, target.defense));
+            target.hp -= reducedDamage;
+            
+            // به‌روزرسانی نوار سلامت
+            if (target.hp < 0) target.hp = 0;
+            document.querySelector(`.country[data-player-id="${target.id}"] .hp-fill`).style.width = `${target.hp}%`;
+            
+            addMessage(`💥 ${target.name} ${reducedDamage} آسیب دید! (❤️${target.hp})`);
+            
+            if (target.hp <= 0) {
+              addMessage(`💀 ${target.name} از بازی حذف شد!`);
+              checkGameEnd();
+            }
+          }
+          
+          // ایجاد انفجار
+          createExplosion(
+            missile.toX, 
+            missile.toY, 
+            missile.type
+          );
+        }
+      });
+      
+      // حذف موشک‌های منفجر شده
+      missiles = missiles.filter(m => !m.exploded || m.progress < 1);
+      
+      // نوبت هوش مصنوعی
+      if (!isPlayerTurn && gameMode === 'single') {
+        aiTurn();
+      }
+      
+      requestAnimationFrame(gameLoop);
+    }
+    
+    // --- بررسی پایان بازی ---
+    function checkGameEnd() {
+      const alivePlayers = Object.values(players).filter(p => p.hp > 0);
+      
+      if (alivePlayers.length === 1) {
+        const winner = alivePlayers[0];
+        document.getElementById('gameResult').textContent = winner.id === localPlayer.id ? 
+          "پیروزی!" : "شکست!";
+        document.getElementById('gameSummary').textContent = winner.id === localPlayer.id ?
+          `شما جهان را فتح کردید! 🎉` :
+          `${winner.name} جهان را فتح کرد!`;
+        document.getElementById('gameOver').style.display = 'flex';
+      }
+    }
+    
+    // --- کنترل‌های نقشه ---
+    worldMap.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      lastX = e.clientX;
+      lastY = e.clientY;
+      e.preventDefault();
+    });
+    
+    window.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      
+      const dx = e.clientX - lastX;
+      const dy = e.clientY - lastY;
+      
+      mapOffsetX += dx;
+      mapOffsetY += dy;
+      
+      // محدودیت‌های حرکت نقشه
+      const maxOffset = 500;
+      mapOffsetX = Math.max(-maxOffset, Math.min(maxOffset, mapOffsetX));
+      mapOffsetY = Math.max(-maxOffset, Math.min(maxOffset, mapOffsetY));
+      
+      worldMap.style.transform = `translate(${mapOffsetX}px, ${mapOffsetY}px)`;
+      lastX = e.clientX;
+      lastY = e.clientY;
+    });
+    
+    window.addEventListener('mouseup', () => {
+      isDragging = false;
+    });
+    
+    // کنترل لمسی برای موبایل
+    worldMap.addEventListener('touchstart', (e) => {
+      isDragging = true;
+      lastX = e.touches[0].clientX;
+      lastY = e.touches[0].clientY;
+      e.preventDefault();
+    });
+    
+    window.addEventListener('touchmove', (e) => {
+      if (!isDragging) return;
+      
+      const dx = e.touches[0].clientX - lastX;
+      const dy = e.touches[0].clientY - lastY;
+      
+      mapOffsetX += dx;
+      mapOffsetY += dy;
+      
+      const maxOffset = 500;
+      mapOffsetX = Math.max(-maxOffset, Math.min(maxOffset, mapOffsetX));
+      mapOffsetY = Math.max(-maxOffset, Math.min(maxOffset, mapOffsetY));
+      
+      worldMap.style.transform = `translate(${mapOffsetX}px, ${mapOffsetY}px)`;
+      lastX = e.touches[0].clientX;
+      lastY = e.touches[0].clientY;
+      e.preventDefault();
+    });
+    
+    window.addEventListener('touchend', () => {
+      isDragging = false;
+    });
+    
+    // چت
+    document.getElementById('chatInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        const input = document.getElementById('chatInput');
+        if (input.value.trim()) {
+          addMessage(`${localPlayer.name}: ${input.value}`);
+          input.value = '';
+        }
+      }
+    });
+    
+    // دکمه پایان نوبت
+    document.getElementById('endTurnBtn').addEventListener('click', endTurn);
+  </script>
+</body>
+</html>
